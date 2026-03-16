@@ -1,3 +1,4 @@
+
 /* 
 Library used: Adafruit Motor Shield library V1 version: 1.0.1
 For this code to run as expected: 
@@ -10,7 +11,7 @@ For this code to run as expected:
 #define DEBUG_PRINT 0
 // MACROS for Analog Input
 #define LEFT_IR A0
-#define RIGHT_IR A1
+#define RIGHT_IR A1++
 // MACROS to control the Robot
 #define DETECT_LIMIT 300
 #define FORWARD_SPEED 60
@@ -154,3 +155,5 @@ void turnLeft() {
   }
   delay(DELAY_AFTER_TURN);
 }
+
+//is blue questionmark?
