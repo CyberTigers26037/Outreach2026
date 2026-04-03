@@ -11,7 +11,7 @@ For this code to run as expected:
 #define DEBUG_PRINT 0
 // MACROS for Analog Input
 #define LEFT_IR A0
-#define RIGHT_IR A1++
+#define RIGHT_IR A1
 // MACROS to control the Robot
 #define DETECT_LIMIT 300
 #define FORWARD_SPEED 60
@@ -21,8 +21,11 @@ For this code to run as expected:
 #define BEFORE_TURN_DELAY 10
 // BO Motor control related data here
 // Here motors are running using M3 and M4 of the shield and Left Motor is connected to M3 and Right Motor is connected to M4 using IC2 of the shield
-AF_DCMotor motorL(3);  // Uses PWM0B pin of Arduino Pin 5 for Enable
-AF_DCMotor motorR(4);  // Uses PWM0A pin of Arduino Pin 6 for Enable
+int motor1pin1 = 2;
+int motor1pin2 = 3;
+
+int motor2pin1 = 4;
+int  motor2pin2 = 5;
 // variables to store the analog values
 int left_value;
 int right_value;
@@ -33,18 +36,15 @@ void setup() {
   Serial.begin(9600);
 #endif  
   // Set the current speed of Left Motor to 0
-  motorL.setSpeed(0);
-  // turn on motor
-  motorL.run(RELEASE);
-  // Set the current speed of Right Motor to 0
-  motorR.setSpeed(0);
-  // turn off motor
-  motorR.run(RELEASE);
-  // To provide starting push to Robot these values are set
-  motorR.run(FORWARD);
-  motorL.run(FORWARD);
-  motorL.setSpeed(255);
-  motorR.setSpeed(255);
+  pinMode(motor1pin1, OUTPUT);
+  pinMode(motor1pin2, OUTPUT);
+  pinMode(motor2pin1,  OUTPUT);
+  pinMode(motor2pin2, OUTPUT);
+  digitalWrite(motor1pin1,  HIGH);
+  digitalWrite(motor1pin2, LOW);
+
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
   delay(40);  // delay of 40 ms
 }
 void loop() {
@@ -79,35 +79,35 @@ void loop() {
 void moveForward() {
   if (lastDirection != 'F') {
     // To provide starting push to Robot when last direction was not forward
-    motorR.run(FORWARD);
-    motorL.run(FORWARD);
-    motorL.setSpeed(255);
-    motorR.setSpeed(255);
+    digitalWrite(motor1pin1, HIGH);
+    digitalWrite(motor1pin2, LOW);
+    digitalWrite(motor2pin1, HIGH);
+    digitalWrite(motor2pin2, LOW);
     lastDirection = 'F';
     delay(20);
   } else {
     // If the last direction was forward
-    motorR.run(FORWARD);
-    motorL.run(FORWARD);
-    motorL.setSpeed(FORWARD_SPEED);
-    motorR.setSpeed(FORWARD_SPEED);
+    digitalWrite(motor1pin1, FORWARD_SPEED);
+    digitalWrite(motor1pin2, LOW);
+    digitalWrite(motor2pin1, FORWARD_SPEED);
+    digitalWrite(motor2pin2, LOW);
   }
 }
 void stop() {
   if (lastDirection != 'S') {
     // When stop is detected move further one time to check if its actual stop or not, needed when the robot turns
-    motorR.run(FORWARD);
-    motorL.run(FORWARD);
-    motorL.setSpeed(255);
-    motorR.setSpeed(255);
+    digitalWrite(motor1pin1, HIGH);
+    digitalWrite(motor1pin2, LOW);
+    digitalWrite(motor2pin1, HIGH);
+    digitalWrite(motor2pin2, LOW);
     lastDirection = 'S';
     delay(40);
   } else {
     // When stop is detected next time then stop the Robot
-    motorL.setSpeed(0);
-    motorR.setSpeed(0);
-    motorL.run(RELEASE);
-    motorR.run(RELEASE);
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, LOW);
+    digitalWrite(motor2pin1, LOW);
+    digitalWrite(motor2pin2, LOW);
     lastDirection = 'S';
   }
 }
@@ -116,7 +116,7 @@ void turnRight(void) {
   if (lastDirection != 'R') {
     lastDirection = 'R';
     // Stop the motor for some time
-    motorL.setSpeed(0);
+    /*motorL.setSpeed(0);
     motorR.setSpeed(0);
     delay(BEFORE_TURN_DELAY);
     // take Slight Right turn
@@ -129,7 +129,7 @@ void turnRight(void) {
     motorL.run(FORWARD);
     motorR.run(BACKWARD);
     motorL.setSpeed(TURN_SHARP_SPEED);
-    motorR.setSpeed(TURN_SHARP_SPEED);
+    motorR.setSpeed(TURN_SHARP_SPEED);*/
   }
   delay(DELAY_AFTER_TURN);
 }
@@ -138,7 +138,7 @@ void turnLeft() {
   if (lastDirection != 'L') {
     lastDirection = 'L';
     // Stop the motor for some time
-    motorL.setSpeed(0);
+    /*motorL.setSpeed(0);
     motorR.setSpeed(0);
     delay(BEFORE_TURN_DELAY);
     // take slight Left turn
@@ -151,9 +151,7 @@ void turnLeft() {
     motorR.run(FORWARD);
     motorL.run(BACKWARD);
     motorL.setSpeed(TURN_SHARP_SPEED);
-    motorR.setSpeed(TURN_SHARP_SPEED);
+    motorR.setSpeed(TURN_SHARP_SPEED);*/
   }
   delay(DELAY_AFTER_TURN);
 }
-
-//is blue questionmark?

@@ -9,8 +9,13 @@ void setup() {
 }
 
 void loop(){
-  Serial.print("L: ");
-  Serial.print(digitalRead(leftSensor));
-  Serial.print(", R: ");
-  Serial.println(digitalRead(rightSensor));
+  if (digitalRead(leftSensor) && digitalRead(rightSensor)) {
+    Serial.println ("Black under both sensors. Stopping");
+  }
+  else if (digitalRead(leftSensor)) {
+    Serial.println ("Black under left sensor. Turning left.");
+  }
+  else if (digitalRead(rightSensor)) {
+    Serial.println ("Black under right sensor. Turning right");
+  }
 }
