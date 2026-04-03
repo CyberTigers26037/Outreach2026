@@ -19,29 +19,9 @@ Motor rightMotor = Motor(BIN1, BIN2, PWMB, offsetB, STBY);
 
 void setup() {
   Serial.begin(9600);
-  delay(5000);
 }
 
 void loop(){
-  if (digitalRead(leftSensor) && digitalRead(rightSensor)) {
-    Serial.println("Stopping");
-    brake(leftMotor, rightMotor);
-  }
-  else if (digitalRead(leftSensor)) {
-    Serial.println("Turning Left");
-    left(leftMotor, rightMotor, SPEED);
-  }
-  else if (digitalRead(rightSensor)) {
-    Serial.println("Turning Right");
-    right(leftMotor, rightMotor, SPEED);
-  }
-  else if (!digitalRead(leftSensor) && !digitalRead(rightSensor)) {
-    Serial.println("Driving Forward");
-    forward(leftMotor, rightMotor, SPEED);
-  }
-}
-
-/*void loop(){
   Serial.println("Driving Forward");
   leftMotor.drive(SPEED);
   rightMotor.drive(SPEED);
@@ -62,5 +42,4 @@ void loop(){
   leftMotor.brake();
   rightMotor.brake();
   delay(3000);
-} */
-//isbluequestionmark
+}
