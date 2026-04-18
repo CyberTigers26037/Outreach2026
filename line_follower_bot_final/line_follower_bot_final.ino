@@ -4,7 +4,7 @@
 #define AIN2 4
 #define PWMA 3
 #define STBY 9
-#define SPEED 100
+#define SPEED -100
 #define BIN1 6
 #define BIN2 7
 #define PWMB 5
@@ -19,7 +19,7 @@ Motor rightMotor = Motor(BIN1, BIN2, PWMB, offsetB, STBY);
 
 void setup() {
   Serial.begin(9600);
-  delay(5000);
+  delay(3000);
 }
 
 void loop(){
