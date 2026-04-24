@@ -1,4 +1,5 @@
 #include <Servo.h>
+#include <EEPROM.h>
 
 // declare all of our servos
 Servo fwdBackServo;
@@ -17,14 +18,23 @@ float rotateServoPos = 90;
 float upDownServoPos = 90;
 float clawServoPos = 90;
 
-float minFwdBack = 45;
-float maxFwdBack = 143;
-float minRotate = 56;
-float maxRotate = 123;
-float minUpDown = 68;
-float maxUpDown = 118;
-float minClaw = 90;
-float maxClaw = 131;
+int minFwdBackAddr = 0;
+int maxFwdBackAddr = 1;
+int minRotateAddr = 2;
+int maxRotateAddr = 3;
+int minUpDownAddr = 4;
+int maxUpDownAddr = 5;
+int minClawAddr = 6;
+int maxClawAddr = 7;
+
+int minFwdBack = 45;
+int maxFwdBack = 143;
+int minRotate = 56;
+int maxRotate = 123;
+int minUpDown = 68;
+int maxUpDown = 118;
+int minClaw = 90;
+int maxClaw = 131;
 
 void setup() {
   fwdBackServo.attach(3);
@@ -32,9 +42,36 @@ void setup() {
   clawServo.attach(6);
   rotateServo.attach(5);
   Serial.begin(9600);
+
+  minFwdBack = readValueOrDefault(minFwdBackAddr, minFwdBack);
+  minFwdBack = readValueOrDefault(maxFwdBackAddr, maxFwdBack);
+  minFwdBack = readValueOrDefault(minRotateAddr, minRotate);
+  minFwdBack = readValueOrDefault(maxRotateAddr, maxRotate);
+  minFwdBack = readValueOrDefault(minUpDownAddr, minUpDown);
+  minFwdBack = readValueOrDefault(maxUpDownAddr, maxUpDown);
+  minFwdBack = readValueOrDefault(minClawAddr, minClaw);
+  minFwdBack = readValueOrDefault(maxClawAddr, maxClaw);
+
 }
 
 void loop() {
+  Serial.print("MIN Fwd/Back: ");
+  Serial.print(minFwdBack);
+  Serial.print("MAX Fwd/Back: ");
+  Serial.print(maxFwdBack);
+  Serial.print(", MIN up/Down: ");
+  Serial.print(minRotate);
+  Serial.print(", MAX up/Down: ");
+  Serial.print(maxRotate);
+  Serial.print(", MIN rotate: ");
+  Serial.print(minUpDown);
+  Serial.print(",MAX rotate: ");
+  Serial.print(maxUpDown);
+  Serial.print(", MIN claw: ");
+  Serial.print(minClaw);
+  Serial.print(", MAX claw: ");
+  Serial.print(maxClaw);
+
   fwdBackServoPos = adjustServo(leftY, fwdBackServo, fwdBackServoPos, minFwdBack, maxFwdBack);
 
   Serial.print("Fwd/Back: ");
@@ -44,6 +81,7 @@ void loop() {
 
   Serial.print(", up/Down: ");
   Serial.print(upDownServoPos);
+
 
   rotateServoPos = adjustServo(leftX, rotateServo, rotateServoPos, minRotate, maxRotate);
 
@@ -56,7 +94,15 @@ void loop() {
   Serial.println(clawServoPos);
 
   // wait for servos to move
-  delay(15);                          
+  delay(15);
+}
+
+int readValueOrDefault(int addr, int defaultValue) {
+  int temp = EEPROM.read(addr);
+  if ((temp >= 0) && (temp <= 180)) {
+    return temp;
+  }
+  return defaultValue;
 }
 
 float adjustServo(int input, Servo servo, float pos, float min, float max) {
@@ -75,3 +121,4 @@ float adjustServo(int input, Servo servo, float pos, float min, float max) {
   servo.write(pos);  
   return pos;
 }
+
