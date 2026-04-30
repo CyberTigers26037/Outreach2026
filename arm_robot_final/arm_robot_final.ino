@@ -8,10 +8,12 @@ Servo clawServo;
 Servo rotateServo;  
 
 // declare all of our joysticks
-int leftY = A0; 
-int leftX = A1;  
-int rightY = A2;  
-int rightX = A3; 
+int leftY = A0;
+int leftX = A1;
+int rightY = A2;
+int rightX = A3;
+int rightButton = A4;
+int leftButton = A5;
 
 float fwdBackServoPos = 90;
 float rotateServoPos = 90;
@@ -44,17 +46,25 @@ void setup() {
   Serial.begin(9600);
 
   minFwdBack = readValueOrDefault(minFwdBackAddr, minFwdBack);
-  minFwdBack = readValueOrDefault(maxFwdBackAddr, maxFwdBack);
-  minFwdBack = readValueOrDefault(minRotateAddr, minRotate);
-  minFwdBack = readValueOrDefault(maxRotateAddr, maxRotate);
-  minFwdBack = readValueOrDefault(minUpDownAddr, minUpDown);
-  minFwdBack = readValueOrDefault(maxUpDownAddr, maxUpDown);
-  minFwdBack = readValueOrDefault(minClawAddr, minClaw);
-  minFwdBack = readValueOrDefault(maxClawAddr, maxClaw);
+  maxFwdBack = readValueOrDefault(maxFwdBackAddr, maxFwdBack);
+  minRotate = readValueOrDefault(minRotateAddr, minRotate);
+  maxRotate = readValueOrDefault(maxRotateAddr, maxRotate);
+  minUpDown = readValueOrDefault(minUpDownAddr, minUpDown);
+  maxUpDown = readValueOrDefault(maxUpDownAddr, maxUpDown);
+  minClaw = readValueOrDefault(minClawAddr, minClaw);
+  maxClaw = readValueOrDefault(maxClawAddr, maxClaw);
 
+  pinMode(rightButton, INPUT_PULLUP);
+  pinMode(leftButton, INPUT_PULLUP);
+
+  fwdBackServo.write(fwdBackServoPos);
+  rotateServo.write(rotateServoPos);
+  upDownServo.write(upDownServoPos);
+  clawServo.write(clawServoPos);
 }
 
 void loop() {
+  /*
   Serial.print("MIN Fwd/Back: ");
   Serial.print(minFwdBack);
   Serial.print("MAX Fwd/Back: ");
@@ -71,27 +81,21 @@ void loop() {
   Serial.print(minClaw);
   Serial.print(", MAX claw: ");
   Serial.print(maxClaw);
+  */
+  fwdBackServoPos = adjustServo(leftY, fwdBackServo, fwdBackServoPos, minFwdBack, maxFwdBack, "Fwd/Back: ");
+  upDownServoPos = adjustServo(rightY, upDownServo, upDownServoPos, minUpDown, maxUpDown, "Up/Down: ");
+  rotateServoPos = adjustServo(leftX, rotateServo, rotateServoPos, minRotate, maxRotate, "Rotate: ");
+  clawServoPos = adjustServo(rightX, clawServo, clawServoPos, minClaw, maxClaw, "Claw: ");
 
-  fwdBackServoPos = adjustServo(leftY, fwdBackServo, fwdBackServoPos, minFwdBack, maxFwdBack);
+  //int btn = digitalRead(leftButton);
+  if (digitalRead(leftButton) == LOW) {
+    Serial.println("left button pressed");
+  }
 
-  Serial.print("Fwd/Back: ");
-  Serial.print(fwdBackServoPos);
-
-  upDownServoPos = adjustServo(rightY, upDownServo, upDownServoPos, minUpDown, maxUpDown);
-
-  Serial.print(", up/Down: ");
-  Serial.print(upDownServoPos);
-
-
-  rotateServoPos = adjustServo(leftX, rotateServo, rotateServoPos, minRotate, maxRotate);
-
-  Serial.print(", rotate: ");
-  Serial.print(rotateServoPos);
-
-  clawServoPos = adjustServo(rightX, clawServo, clawServoPos, minClaw, maxClaw);
-
-  Serial.print(", claw: ");
-  Serial.println(clawServoPos);
+  //btn = digitalRead(rightButton);
+  if (digitalRead(rightButton) == LOW) {
+    Serial.println("right button pressed");
+  }
 
   // wait for servos to move
   delay(15);
@@ -105,20 +109,25 @@ int readValueOrDefault(int addr, int defaultValue) {
   return defaultValue;
 }
 
-float adjustServo(int input, Servo servo, float pos, float min, float max) {
-  float val = analogRead(input);         
-  val = map(val, 0, 1023, -5, 5);
+float adjustServo(int input, Servo servo, float pos, float min, float max, char title[]) {
+  float joystickInput = analogRead(input);         
+  joystickInput = map(joystickInput, 0, 1023, -5, 5);
 
   // create a dead zone around 0 where the joystick doesn't work
-  if (abs(val) <= 1) {
-    val = 0;
+  if (abs(joystickInput) <= 1) {
+    joystickInput = 0;
   }
 
-  pos += val / 5;
+  pos += (joystickInput / 5);
   
   // constrain the servo to the min/max values
-  pos = constrain(pos, min, max);
-  servo.write(pos);  
+  pos = round(constrain(pos, min, max));
+
+  if (pos != servo.read()) {
+    Serial.print(title);
+    Serial.println((int)pos);
+    servo.write(pos);
+  }
   return pos;
 }
 
