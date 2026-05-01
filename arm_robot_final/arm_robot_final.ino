@@ -54,9 +54,13 @@ bool inCalibrationModeRightJoystick = false;
 enum CalibrationStep {
   START,
   FWD_BACK_1,
+  UP_DOWN_1,
   FWD_BACK_2,
+  UP_DOWN_2,
   ROTATE_1,
+  CLAW_1,
   ROTATE_2,
+  CLAW_2,
   STOP
 };
 CalibrationStep calibrationStep = START;
@@ -189,7 +193,54 @@ void runCalibrationStepsLeftJoystick() {
 }
 
 void runCalibrationStepsRightJoystick() {
-  // TODO: write steps for calibrating with the right joystick...
+  switch (calibrationStep) {
+    case START:
+      calibrationStep = UP_DOWN_1;
+      break;
+    case UP_DOWN_1:
+      upDownServoPos = adjustServo(rightY, upDownServo, upDownServoPos, minUpDown, maxUpDown, "Up/Down: ");
+      if (rightButtonPressed) {
+        lastCalibrationPosition = upDownServoPos;
+        calibrationStep = UP_DOWN_2;
+      }
+      break;
+    case UP_DOWN_2:
+      upDownServoPos = adjustServo(rightY, upDownServo, upDownServoPos, minUpDown, maxUpDown, "Up/Down: ");
+      if (rightButtonPressed) {
+        minFwdBack = (lastCalibrationPosition > upDownServoPos) ? upDownServoPos : lastCalibrationPosition;
+        maxFwdBack = (lastCalibrationPosition > upDownServoPos) ? lastCalibrationPosition : upDownServoPos;
+        Serial.print("Saving minUpDown as ");
+        Serial.println(minUpDown);
+        Serial.print("Saving maxUpDown as ");
+        Serial.println(maxUpDown);
+        calibrationStep = CLAW_1;
+      }
+      break;
+    case CLAW_1:
+      clawServoPos  = adjustServo(rightX, clawServo, clawServoPos, minClaw, maxClaw, "Claw: ");
+      if (rightButtonPressed) {
+        lastCalibrationPosition = clawServoPos;
+        calibrationStep = CLAW_2;
+      }
+      break;
+    case CLAW_2:
+      clawServoPos  = adjustServo(rightX, clawServo, clawServoPos, minClaw, maxClaw, "Claw: ");
+      if (rightButtonPressed) {
+        minRotate = (lastCalibrationPosition > clawServoPos) ? clawServoPos : lastCalibrationPosition;
+        maxRotate = (lastCalibrationPosition > clawServoPos) ? lastCalibrationPosition : clawServoPos;
+        Serial.print("Saving minClaw as ");
+        Serial.println(minClaw);
+        Serial.print("Saving maxClaw as ");
+        Serial.println(maxClaw);
+        calibrationStep = STOP;
+      }
+      break;
+    case STOP:
+      Serial.println("Exiting calibration mode for right joystick");
+      inCalibrationModeRightJoystick = false;
+      break;
+  }
+
 }
 
 void enterCalibrationModeIfNeeded() {
