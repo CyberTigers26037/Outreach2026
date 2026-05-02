@@ -1,6 +1,8 @@
 #include <Servo.h>
 #include <EEPROM.h>
 
+#define LED_BLINK_DURATION 500 // 500ms on, 500ms off
+
 // declare all of our servos
 Servo fwdBackServo;
 Servo upDownServo;
@@ -8,12 +10,12 @@ Servo clawServo;
 Servo rotateServo;  
 
 // declare all of our joysticks
-int leftX = A0;
+int leftX = A2;
 int leftY = A1;
-int leftButton = A2;
-int rightX = A3;
+int leftButton = A0;
+int rightX = A5;
 int rightY = A4;
-int rightButton = A5;
+int rightButton = A3;
 
 float fwdBackServoPos = 90;
 float rotateServoPos = 90;
@@ -51,6 +53,10 @@ bool oldRightButtonDown = false;
 long buttonTimer = 0;
 bool inCalibrationModeLeftJoystick = false;
 bool inCalibrationModeRightJoystick = false;
+int blinksRemaining = 0;
+long ledBlinkTimer = 0;
+bool blinkLedIsOn = false;
+
 enum CalibrationStep {
   START,
   FWD_BACK_1,
@@ -99,6 +105,7 @@ void setup() {
   Serial.print("MAX claw: ");
   Serial.println(maxClaw);
 
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(rightButton, INPUT_PULLUP);
   pinMode(leftButton, INPUT_PULLUP);
 
@@ -126,6 +133,8 @@ void loop() {
 
     enterCalibrationModeIfNeeded();
   }
+
+  blinkLedIfNeeded();
 
   // wait for servos to move
   delay(15);
@@ -272,6 +281,7 @@ void enterCalibrationModeIfNeeded() {
         maxFwdBack = 180;
         minRotate = 0;
         maxRotate = 180;
+        blinkLed(3);
       }
       else {
         Serial.println("Entering calibration mode for right stick");
@@ -280,6 +290,7 @@ void enterCalibrationModeIfNeeded() {
         maxUpDown = 180;
         minClaw = 0;
         maxClaw = 180;
+        blinkLed(3);
       }
       calibrationStep = START;
       stopTimer(buttonTimer);
@@ -338,3 +349,27 @@ bool hasTimeElapsed(long timer, long milliseconds) {
   return (millis() > (timer + milliseconds));
 }
 
+void blinkLed(int blinkCount) {
+  blinksRemaining = blinkCount;
+  if (blinkCount > 0) {
+    // set the blink timer to expired so it fires immediately
+    ledBlinkTimer = 1;
+  }
+}
+
+void blinkLedIfNeeded() {
+  if (blinksRemaining == 0) return;
+
+  if (hasTimeElapsed(ledBlinkTimer, LED_BLINK_DURATION)) {
+    if (blinkLedIsOn) {
+      digitalWrite(LED_BUILTIN, LOW);
+      blinksRemaining--;
+      blinkLedIsOn = false;
+    }
+    else {
+      digitalWrite(LED_BUILTIN, HIGH);
+      blinkLedIsOn = true;
+    }
+    startTimer(ledBlinkTimer);
+  }
+}
