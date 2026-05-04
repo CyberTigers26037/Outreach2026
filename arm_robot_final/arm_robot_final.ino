@@ -173,6 +173,7 @@ void runCalibrationStepsLeftJoystick() {
         Serial.println(minFwdBack);
         Serial.print("Saving maxFwdBack as ");
         Serial.println(maxFwdBack);
+        blinkLed(2);
         calibrationStep = ROTATE_1;
       }
       break;
@@ -203,6 +204,7 @@ void runCalibrationStepsLeftJoystick() {
       calibrationStep = STOP;
       break;
     case STOP:
+      blinkLed(3);
       Serial.println("Exiting calibration mode for left joystick");
       inCalibrationModeLeftJoystick = false;
       break;
@@ -230,6 +232,7 @@ void runCalibrationStepsRightJoystick() {
         Serial.println(minUpDown);
         Serial.print("Saving maxUpDown as ");
         Serial.println(maxUpDown);
+        blinkLed(2);
         calibrationStep = CLAW_1;
       }
       break;
@@ -249,7 +252,7 @@ void runCalibrationStepsRightJoystick() {
         Serial.println(minClaw);
         Serial.print("Saving maxClaw as ");
         Serial.println(maxClaw);
-        calibrationStep = STOP;
+        calibrationStep = SAVE;
       }
       break;
     case SAVE:
@@ -260,6 +263,7 @@ void runCalibrationStepsRightJoystick() {
       calibrationStep = STOP;
       break;
     case STOP:
+      blinkLed(3);
       Serial.println("Exiting calibration mode for right joystick");
       inCalibrationModeRightJoystick = false;
       break;
