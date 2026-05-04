@@ -113,6 +113,8 @@ void setup() {
   rotateServo.write(rotateServoPos);
   upDownServo.write(upDownServoPos);
   clawServo.write(clawServoPos);
+
+  blinkLed(3);
 }
 
 void loop() {
